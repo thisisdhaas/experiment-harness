@@ -14,23 +14,25 @@ from subprocess import check_output, CalledProcessError
 from tempfile import mkdtemp
 
 VERSION_RE = re.compile("__version__ = ['\"]([^'\"]+)['\"]")
-
+PACKAGE_NAME = 'pyharness'
+PACKAGE_REPO = 'github.com/thisisdhaas/pyharness'
 
 def main(args):
     # Compute the new version number
-    old_version = get_version('pyharness')
+    old_version = get_version(PACKAGE_NAME)
     new_version = increment_version_number(old_version, args.version_part)
 
     # Verify that our git setup is reasonable and print a loud warning.
     verify_and_warn(old_version, new_version, args)
 
-    # Update pyharness/__init__.py with the new version
+    # Update __init__.py with the new version
     if args.no_commit:
-        print('--no-commit passed, not committing new version to pyharness.')
+        print('--no-commit passed, not committing new version to {}.'
+              .format(PACKAGE_NAME))
         release_version = old_version
         version_text = 'current'
     else:
-        update_version('pyharness', new_version, fake=args.fake)
+        update_version(PACKAGE_NAME, new_version, fake=args.fake)
         release_version = new_version
         version_text = 'new'
 
@@ -96,8 +98,8 @@ def verify_and_warn(old_version, new_version, args):
           'you CANNOT TAKE BACK. Before proceeding, ensure that you are on '
           'the master branch, have pulled the latest changes, and have no '
           'outstanding local changes. THIS SCRIPT WILL FAIL if you do not '
-          'have credentials to push to the pyharness GitHub repository or the '
-          'pyharness PyPI account.'.format(action_text))
+          'have credentials to push to the {} GitHub repository or the '
+          '{} PyPI account.'.format(action_text, PACKAGE_NAME, PACKAGE_NAME))
     ack = input('ARE YOU SURE YOU WISH TO PROCEED? (Type "release" to '
                 'confirm): ').lower().strip('\' "')
     while ack in ['y', 'yes']:
@@ -110,8 +112,8 @@ def get_action_text(old_version, new_version, args):
     actions = []
     release_version = old_version if args.no_commit else new_version
     if not args.no_commit:
-        actions.append('increment the pyharness version from {} to {}'.format(
-            old_version, new_version))
+        actions.append('increment the {} version from {} to {}'.format(
+            PACKAGE_NAME, old_version, new_version))
     if not args.no_tag:
         actions.append('create a tag for version {}'.format(release_version))
     if not args.no_pypi:
@@ -188,12 +190,12 @@ def commit_and_push(fake=False):
 def tag_release(version, fake=False):
     # Create the tag
     tag_str = 'v{}'.format(version)
-    tag_msg = 'Version {} of pyharness'.format(version)
+    tag_msg = 'Version {} of {}'.format(version, PACKAGE_NAME)
     tag_cmd = ['git', 'tag', '-am', tag_msg, tag_str]
     wrap_command(tag_cmd, fake)
 
     # Update the stable tag
-    stable_tag_msg = 'The latest stable release of Orchestra.'
+    stable_tag_msg = 'The latest stable release of {}.'.format(PACKAGE_NAME)
     stable_tag_cmd = ['git', 'tag', '-afm', stable_tag_msg, 'stable']
     wrap_command(stable_tag_cmd, fake)
 
@@ -213,15 +215,15 @@ def pypi_release(tag_str, fake=False):
     os.chdir(release_dir)
 
     # Clone the git repo for release
-    print('Cloning pyharness into the new release directory.')
-    clone_cmd = ['git', 'clone', 'https://github.com/thisisdhaas/pyharness',
+    print('Cloning {} into the new release directory.'.format(PACKAGE_NAME))
+    clone_cmd = ['git', 'clone', PACKAGE_REPO,
                  '-b', tag_str]
     wrap_command(clone_cmd, fake)  # This is safe to always run.
     if not fake:
-        os.chdir('pyharness')
+        os.chdir(PACKAGE_NAME)
 
     # Release to pypi
-    print('Releasing pyharness to PyPI.')
+    print('Releasing {} to PyPI.'.format(PACKAGE_NAME))
     pypi_cmd = ['python3', 'setup.py', 'sdist', 'upload', '-r', 'pypi']
     wrap_command(pypi_cmd, fake)
 
