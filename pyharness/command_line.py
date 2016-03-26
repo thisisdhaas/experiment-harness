@@ -6,7 +6,8 @@ RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            '../results')
 OUT_DIR = os.path.join(RESULTS_DIR, 'simulated')
 
-def main(args):
+def main():
+    args = parse_args()
     if not args.list and not args.experiments:
         print "Nothing to do: no experiments passed."
         print ("Did you forget the '-e' flag? Run 'python main.py --help' for "
@@ -53,6 +54,3 @@ def parse_args():
                         help=('Only run the experiment: don\'t plot the '
                               'results.'))
     return parser.parse_args()
-
-if __name__ == '__main__':
-    main(parse_args())
