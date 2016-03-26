@@ -1,10 +1,8 @@
 import os
 import argparse
-from experiments import run_experiment, list_experiments
+from experiment import run_experiment, list_experiments
 
-RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           '../results')
-OUT_DIR = os.path.join(RESULTS_DIR, 'simulated')
+OUT_DIR = os.path.join(os.path.abspath('.'), 'results')
 
 def main():
     args = parse_args()
@@ -16,15 +14,21 @@ def main():
 
     if args.list:
         print "Available experiments:"
-        for exp in list_experiments():
+        for exp in list_experiments(args.exp_home):
             print "\t", exp
         return
 
     for exp in args.experiments:
-        run_experiment(exp, out_dir=args.outdir, db_name=args.dbname,
-                       do_run=not args.plot_only, do_plot=not args.run_only,
-                       overwrite=not args.no_overwrite,
-                       partition=args.partition)
+        run_experiment(
+            exp,
+            exp_home=args.exp_home,
+            out_dir=args.outdir,
+            db_name=args.dbname,
+            do_run=not args.plot_only,
+            do_plot=not args.run_only,
+            overwrite=not args.no_overwrite,
+            partition=args.partition
+        )
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run experiments on the crowd '
@@ -33,15 +37,18 @@ def parse_args():
                         metavar='EXPERIMENT_NAME',
                         help=('Names of experiments to run. See --list option '
                               'for available experiments.'))
-    parser.add_argument('--dbname', '-d', default='crowderstats',
+    parser.add_argument('--exp-home', default='.',
+                        help=('Directory to find experiments in (defaults to '
+                              '"."'))
+    parser.add_argument('--dbname', '-d', default='pyharness-db',
                         help=('Postgres database to connect to. (defaults to '
-                              '\'crowderstats\')'))
+                              '\'pyharness-db\')'))
     parser.add_argument('--no-overwrite', action='store_true',
                         help=('Add to existing data in database instead of '
                               'overwriting it. (defaults to False)'))
     parser.add_argument('--outdir', '-o', default=OUT_DIR,
                         help=('Directory to output data and plots to. '
-                              '(defaults to \'../results/simulated/\''))
+                              '(defaults to \'./results/\''))
     parser.add_argument('--partition', '-s', type=int,
                         help='Partition of the grid to run the experiments on.')
     parser.add_argument('--list', '-l', action='store_true',
