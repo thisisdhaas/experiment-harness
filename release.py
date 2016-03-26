@@ -15,7 +15,7 @@ from tempfile import mkdtemp
 
 VERSION_RE = re.compile("__version__ = ['\"]([^'\"]+)['\"]")
 PACKAGE_NAME = 'pyharness'
-PACKAGE_REPO = 'github.com/thisisdhaas/pyharness'
+PACKAGE_REPO = 'https://github.com/thisisdhaas/pyharness'
 
 def main(args):
     # Compute the new version number
